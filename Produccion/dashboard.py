@@ -1,15 +1,10 @@
-import mysql
-import mysql.connector
 import streamlit as st
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
-import pymysql
 from sqlalchemy import create_engine, text
-from datetime import date, datetime, timedelta
-import user_agents
-import hashlib
+from datetime import datetime, timedelta, date
 import warnings
 warnings.filterwarnings('ignore')
 
@@ -38,7 +33,7 @@ TABLE_CONFIG = {
     'fuentes_trafico': 'fuentes_trafico',
     'user_sessions' : 'user_sessions'
 }
-date(2025, 9, 1)
+
 # 🎨 CONFIGURACIÓN DE STREAMLIT
 st.set_page_config(
     page_title="GA4 Analytics Dashboard",
@@ -124,19 +119,6 @@ st.markdown("""
     }
 </style>
 """, unsafe_allow_html=True)
-
-# Conexion a la base de datos.
-def create_connection():
-    try:
-        connection = mysql.connector.connect(**DB_CONFIG)
-        if connection.is_connected():
-            hora_actual = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            print(f"Conectado a las {hora_actual}")
-            return connection
-    except mysql.connector.Error as e:
-        st.error(f"Error conectando a MySQL: {e}")
-        return None
-
 
 @st.cache_resource
 class DatabaseConnection:
@@ -317,28 +299,6 @@ def get_search_terms_range(_db, fecha_inicio, fecha_fin, limit=20):
     AND searchTerm != ''
     AND searchTerm != '(not set)'
     GROUP BY searchTerm
-    ORDER BY SUM(sessions) DESC
-    LIMIT %s
-    """
-    return _db.query(sql, params=(fecha_inicio, fecha_fin, limit))
-
-@st.cache_data(ttl=300)
-def get_internal_search_range(_db, fecha_inicio, fecha_fin, limit=20):
-    """Obtener datos de búsqueda interna en un rango de fechas"""
-    sql = f"""
-    SELECT 
-        searchTerm as "Término Búsqueda Interna",
-        pagePath as "Página",
-        SUM(sessions) as "Sesiones",
-        SUM(activeUsers) as "Usuarios Activos",
-        SUM(screenPageViews) as "Páginas Vistas",
-        AVG(bounceRate) as "Tasa de Rebote"
-    FROM {TABLE_CONFIG['busqueda_interna']} 
-    WHERE fecha BETWEEN %s AND %s
-    AND searchTerm IS NOT NULL 
-    AND searchTerm != ''
-    AND searchTerm != '(not set)'
-    GROUP BY searchTerm, pagePath
     ORDER BY SUM(sessions) DESC
     LIMIT %s
     """
