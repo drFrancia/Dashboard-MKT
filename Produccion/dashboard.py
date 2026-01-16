@@ -337,11 +337,14 @@ def get_traffic_sources_range(_db, fecha_inicio, fecha_fin, limit=20):
         SUM(sessions) as "Sesiones"
     FROM {TABLE_CONFIG['fuentes_trafico']} 
     WHERE fecha BETWEEN %s AND %s
+    AND sourceMedium IS NOT NULL 
+    AND sourceMedium != ''
+    AND sourceMedium != '(not set)'
     GROUP BY sourceMedium
     ORDER BY SUM(sessions) DESC
-    LIMIT %s
+    LIMIT {limit}
     """
-    return _db.query(sql, params=(fecha_inicio, fecha_fin, limit))
+    return _db.query(sql, params=(fecha_inicio, fecha_fin))
 
 
 @st.cache_data(ttl=300)

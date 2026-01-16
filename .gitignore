@@ -1,3 +1,5 @@
 /trash
 /templates
 /imagenes.json
+/.env
+/.env.example
