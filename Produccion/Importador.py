@@ -364,15 +364,13 @@ def main():
     # Información de tablas esperadas
     with st.sidebar.expander("📋 Tablas Esperadas"):
         st.markdown("""
-        **Tablas que debe tener tu BD:**
+        **Tablas activas en BD (6):**
         - `metricas_generales`
         - `dispositivos`
-        - `geografia`  
         - `paginas_top`
-        - `fuentes_trafico`
-        - `terminos_busqueda`
-        - `busqueda_interna`
         - `datos_horarios`
+        - `fuentes_trafico`
+        - `utm_tracking`
         """)
     
     # Área principal
@@ -539,17 +537,14 @@ def import_data(excel_file, target_date):
                 'errores': []
             }
             
-            # Mapeo de funciones de inserción - ACTUALIZADO
+            # Mapeo de funciones de inserción - SOLO 6 TABLAS ACTIVAS
             insert_functions = {
                 'metricas_generales': insert_metricas_generales,
                 'dispositivos': insert_dispositivos,
-                'geografia': insert_geografia,
                 'paginas_top': insert_paginas_top,
-                'fuentes_trafico': insert_fuentes_trafico,
-                'terminos_busqueda': insert_terminos_busqueda,      # NUEVO
-                'busqueda_interna': insert_busqueda_interna,        # NUEVO
                 'datos_horarios': insert_datos_horarios,
-                'utm_tracking': insert_utm_tracking                 # NUEVO - Seguimiento UTM
+                'fuentes_trafico': insert_fuentes_trafico,
+                'utm_tracking': insert_utm_tracking
             }
             
             # Procesar cada hoja
@@ -564,10 +559,7 @@ def import_data(excel_file, target_date):
                         try:
                             insert_functions[sheet_name](connection, df, target_date)
                             results[sheet_name] = len(df)
-                            
-                            # Emoji especial para las nuevas tablas
-                            emoji = "✅" if sheet_name in ['terminos_busqueda', 'busqueda_interna'] else "✅"
-                            st.success(f"{emoji} {sheet_name}: {len(df)} registros procesados")
+                            st.success(f"✅ {sheet_name}: {len(df)} registros procesados")
                         except Exception as e:
                             error_msg = f"{sheet_name}: {str(e)}"
                             results['errores'].append(error_msg)
